@@ -26,7 +26,7 @@
     "chroma-js": "^2.4.2",
     "events": "^3.3.0",
     "jszip": "^3.10.1",
-    "maplibre-gl": "^4.0.2",
+    "maplibre-gl": "^4.1.0",
     "material-symbols": "^0.15.0",
     "primevue": "^3.48.1",
     "vue": "^3.4.19",
