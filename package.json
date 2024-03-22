@@ -28,7 +28,7 @@
     "jszip": "^3.10.1",
     "maplibre-gl": "^4.0.2",
     "material-symbols": "^0.15.0",
-    "primevue": "^3.48.1",
+    "primevue": "^3.49.1",
     "vue": "^3.4.19",
     "ws": "^8.16.0"
   },
