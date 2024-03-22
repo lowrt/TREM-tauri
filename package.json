@@ -29,7 +29,7 @@
     "maplibre-gl": "^4.0.2",
     "material-symbols": "^0.15.0",
     "primevue": "^3.48.1",
-    "vue": "^3.4.19",
+    "vue": "^3.4.21",
     "ws": "^8.16.0"
   },
   "devDependencies": {
