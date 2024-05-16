@@ -28,10 +28,8 @@ import PostalCode from "./assets/json/code.json";
 import {
   calculateEpicenterDistance,
   calculateExpectedIntensity,
-  calculateIntensity,
   calculateLocalExpectedWaveTime,
   calculateWaveRadius,
-  roundIntensity,
 } from "./scripts/helper/utils";
 import { getAudio } from "./scripts/helper/audio";
 import JSZip from "jszip";
@@ -46,7 +44,11 @@ const api = new ExpTechApi(config.cache.api.key);
 const timer: Record<string, number> = {};
 const eewTimer: Record<string, number> = {};
 
-const ntp = { remote: Date.now(), server: Date.now(), client: Date.now() };
+const ntp = reactive({
+  remote: Date.now(),
+  server: Date.now(),
+  client: Date.now(),
+});
 const activeReport = ref<Report>();
 const currentView = ref<string>("home");
 
@@ -105,35 +107,38 @@ const updateRtsEew = async () => {
     return;
   }
 
-  try {
-    const data = await api.getRts();
-    ntp.server = data.time;
-    ntp.remote = data.time;
-    ntp.client = Date.now();
-    api.emit(WebSocketEvent.Rts, data);
-  } catch (err) {
-    if (err instanceof Error) {
-      error("[API] Error fetching rts data.");
-      if (err.stack) {
-        trace(err.stack);
+  api
+    .getRts()
+    .then((data) => {
+      ntp.server = data.time;
+      ntp.remote = data.time;
+      ntp.client = Date.now();
+      api.emit(WebSocketEvent.Rts, data);
+    })
+    .catch((err) => {
+      if (err instanceof Error) {
+        error("[API] Error fetching rts data.");
+        if (err.stack) {
+          trace(err.stack);
+        }
       }
-    }
-  }
+    });
 
-  try {
-    const data = await api.getEew();
-
-    for (const e of data) {
-      api.emit(WebSocketEvent.Eew, e);
-    }
-  } catch (err) {
-    if (err instanceof Error) {
-      error("[API] Error fetching eew data.");
-      if (err.stack) {
-        trace(err.stack);
+  api
+    .getEew()
+    .then((data) => {
+      for (const e of data) {
+        api.emit(WebSocketEvent.Eew, e);
       }
-    }
-  }
+    })
+    .catch((err) => {
+      if (err instanceof Error) {
+        error("[API] Error fetching eew data.");
+        if (err.stack) {
+          trace(err.stack);
+        }
+      }
+    });
 };
 
 updateRtsEew();
@@ -246,16 +251,10 @@ api.on(WebSocketEvent.Eew, (e) => {
       lat: e.eq.lat,
       lng: e.eq.lon,
     })({ lng: area.lng, lat: area.lat })(e.eq.depth);
-    const localExpectedIntensity = calculateIntensity(
-      surfaceDistance,
-      distance,
-      e.eq.mag,
-      e.eq.depth
-    );
 
     data.surface = surfaceDistance;
     data.distance = distance;
-    data.i = roundIntensity(localExpectedIntensity);
+    data.i = intensity[config.cache.location.area];
 
     let { p, s } = calculateLocalExpectedWaveTime(
       data.distance,
@@ -547,7 +546,7 @@ onBeforeUnmount(() => {
 
 <template lang="pug">
 NavigationBar(:current-view="currentView", :change-view="changeView")
-TimeDisplay(:timestamp="rts.time")
+TimeDisplay(:timestamp="ntp.server")
 MapView(:current-view="currentView", :reports="reports", :active-report="activeReport", :stations="stations", :rts="rts", :eew="eew", :current-eew-index="currentEewIndex", :change-report="changeReport")
 HomeView(:current-view="currentView", :stations="stations", :rts="rts", :eew="eew", :current-eew-index="currentEewIndex", :reports="reports", :change-report="changeReport", :change-view="changeView")
 ReportBox(:current-view="currentView", :report="activeReport", :handle-hide-report-box="handleHideReportBox")
