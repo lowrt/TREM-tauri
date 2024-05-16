@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@fontsource/lato": "^5.0.20",
-    "@fontsource/noto-sans-tc": "^5.0.18",
+    "@fontsource/noto-sans-tc": "^5.0.19",
     "@fontsource/open-sans": "^5.0.27",
     "@tauri-apps/api": "^2.0.0-beta.6",
     "@tauri-apps/plugin-autostart": "^2.0.0-beta.2",
